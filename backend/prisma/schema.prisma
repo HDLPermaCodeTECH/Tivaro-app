@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  password   String
+  products   Product[]
+  sales      Sale[]
+  receipts   Receipt[]
+  expenses   Expense[]
+  customers  Customer[]
+  debts      Debt[]
+  plan       String    @default("FREE")
+  role       String    @default("ADMIN")
+  name       String?
+  owner_id   String?
+  staff      User[]    @relation("UserStaff")
+  owner      User?     @relation("UserStaff", fields: [owner_id], references: [id])
+  cashier_sales Sale[] @relation("CashierSales")
+  admin_reports ShiftReport[] @relation("AdminReports")
+  staff_reports ShiftReport[] @relation("StaffReports")
+  business_name      String?
+  business_address   String?
+  business_phone     String?
+  business_logo      String?
+  receipt_footer     String?
+  daily_goal         Float     @default(0)
+  last_login_at      DateTime?
+  is_suspended       Boolean   @default(false)
+  suppliers          Supplier[]
+  debt_payments      DebtPayment[] @relation("CashierPayments")
+  messages           Message[]
+  created_at DateTime  @default(now())
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  name       String
+  email      String?
+  phone      String?
+  address    String?
+  sales      Sale[]
+  debts      Debt[]
+  created_at DateTime @default(now())
+}
+
+model Product {
+  id                  String   @id @default(uuid())
+  user_id             String
+  user                User     @relation(fields: [user_id], references: [id])
+  name                String
+  sku                 String?
+  quantity            Int      @default(0)
+  unit                String   @default("pcs")
+  cost_price          Float    @default(0)
+  selling_price       Float    @default(0)
+  low_stock_threshold Int      @default(5)
+  supplier_id         String?
+  supplier            Supplier? @relation(fields: [supplier_id], references: [id])
+  image_url           String?
+  sale_items          SaleItem[]
+  created_at          DateTime @default(now())
+}
+
+model Sale {
+  id           String     @id @default(uuid())
+  user_id      String
+  user         User       @relation(fields: [user_id], references: [id])
+  customer_id  String?
+  customer     Customer?  @relation(fields: [customer_id], references: [id])
+  total_amount Float      @default(0)
+  payment_status String   @default("PAID") // PAID, UNPAID, PARTIAL
+  cashier_id   String?
+  cashier      User?      @relation("CashierSales", fields: [cashier_id], references: [id])
+  items        SaleItem[]
+  receipt      Receipt?
+  debt         Debt?
+  created_at   DateTime   @default(now())
+}
+
+model SaleItem {
+  id         String  @id @default(uuid())
+  sale_id    String
+  sale       Sale    @relation(fields: [sale_id], references: [id])
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+  quantity   Int
+  price      Float
+  cost_price Float   @default(0)
+}
+
+model Receipt {
+  id         String   @id @default(uuid())
+  sale_id    String   @unique
+  sale       Sale     @relation(fields: [sale_id], references: [id])
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  description String
+  amount      Float
+  category    String   @default("General")
+  date        DateTime @default(now())
+  created_at  DateTime @default(now())
+}
+
+model ShiftReport {
+  id                 String   @id @default(uuid())
+  admin_id           String
+  admin              User     @relation("AdminReports", fields: [admin_id], references: [id])
+  cashier_id         String
+  cashier            User     @relation("StaffReports", fields: [cashier_id], references: [id])
+  total_sales        Float    @default(0)
+  total_collections  Float    @default(0)
+  total_transactions Int      @default(0)
+  unpaid_sales_json  String?  // Detailed list of new debts
+  collections_json   String?  // Detailed list of debt collections
+  start_time         DateTime?
+  end_time           DateTime @default(now())
+  created_at         DateTime @default(now())
+}
+
+model Supplier {
+  id             String   @id @default(uuid())
+  user_id        String
+  user           User     @relation(fields: [user_id], references: [id])
+  name           String
+  contact_person String?
+  email          String?
+  phone          String?
+  address        String?
+  products       Product[]
+  created_at     DateTime @default(now())
+}
+
+model Debt {
+  id               String        @id @default(uuid())
+  user_id          String
+  user             User          @relation(fields: [user_id], references: [id])
+  customer_id      String?
+  customer         Customer?     @relation(fields: [customer_id], references: [id])
+  customer_name    String?       // Fallback for manual entry
+  amount           Float
+  remaining_amount Float
+  due_date         DateTime?
+  status           String        @default("PENDING") // PENDING, PAID, PARTIAL
+  notes            String?
+  sale_id          String?       @unique
+  sale             Sale?         @relation(fields: [sale_id], references: [id])
+  payments         DebtPayment[]
+  created_at       DateTime      @default(now())
+}
+
+model DebtPayment {
+  id             String   @id @default(uuid())
+  debt_id        String
+  debt           Debt     @relation(fields: [debt_id], references: [id])
+  amount         Float
+  payment_method String   @default("CASH")
+  cashier_id     String?
+  cashier        User?    @relation("CashierPayments", fields: [cashier_id], references: [id])
+  date           DateTime @default(now())
+  created_at     DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  content    String
+  status     String   @default("PENDING") // PENDING, READ, RESOLVED
+  reply      String?
+  replied_at DateTime?
+  attachment String?
+  created_at DateTime @default(now())
+}
+
+model Announcement {
+  id         String   @id @default(uuid())
+  title      String
+  content    String
+  type       String   @default("INFO") // INFO, WARNING, MAINTENANCE
+  created_at DateTime @default(now())
+}
