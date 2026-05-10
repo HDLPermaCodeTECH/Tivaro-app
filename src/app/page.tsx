@@ -208,7 +208,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative px-6 overflow-hidden min-h-screen flex items-center justify-center">
+      <section className="relative px-6 overflow-hidden min-h-screen flex items-center justify-center pt-20">
         
         {/* Video Background Fade Slider */}
         <div className="absolute inset-0 z-0 overflow-hidden">

@@ -60,7 +60,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative min-h-[100dvh] flex items-center justify-center p-4 overflow-hidden">
       
       {/* Video Background Fade Slider */}
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -87,7 +87,7 @@ export default function LoginPage() {
       </div>
 
       {/* Login Card */}
-      <div className="bg-white border border-slate-100 w-full max-w-md space-y-8 p-8 rounded-3xl shadow-2xl relative z-10">
+      <div className="bg-white border border-slate-100 w-full max-w-md space-y-8 p-6 sm:p-8 rounded-3xl shadow-2xl relative z-10">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <img src="/tivaro_logo_1024.svg" alt="Tivaro Logo" className="w-16 h-16 object-contain" />
