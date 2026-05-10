@@ -12,7 +12,7 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
 
       try {
         // Fetch all unsynced sales
-        const salesToSync = await db.sales.where('synced').equals(false).toArray();
+        const salesToSync = await db.sales.filter(sale => !sale.synced).toArray();
         
         if (salesToSync.length === 0) return;
 
