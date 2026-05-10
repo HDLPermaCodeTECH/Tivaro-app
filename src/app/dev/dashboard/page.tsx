@@ -8,6 +8,15 @@ import { UserX, Bell, Megaphone, TrendingUp } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.tivaroapp.com/api';
 
+const devFetch = async (path: string, options: RequestInit = {}) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('tivaro_token') : null;
+  const headers = {
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
+  return fetch(`${API_URL}${path}`, { ...options, headers });
+};
+
 export default function DevDashboardPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalUsers: 0, totalRevenue: 0, activeSessions: 0 });
@@ -55,7 +64,7 @@ export default function DevDashboardPage() {
 
   const handleImpersonate = async (id: string) => {
     try {
-      const res = await fetch(`${API_URL}/dev/impersonate/${id}`);
+      const res = await devFetch(`/dev/impersonate/${id}`);
       const data = await res.json();
       if (data.success) {
         localStorage.setItem('tivaro_token', data.token);
@@ -76,7 +85,7 @@ export default function DevDashboardPage() {
     if (!msgContent.trim() || !userToMsg) return;
     setSendingMsg(true);
     try {
-      const response = await fetch(`${API_URL}/dev/send-message`, {
+      const response = await devFetch(`/dev/send-message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +115,7 @@ export default function DevDashboardPage() {
     }
     setSendingEmail(true);
     try {
-      const response = await fetch(API_URL + '/dev/send-email', {
+      const response = await devFetch('/dev/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: emailTo, subject: emailSubject, content: emailContent })
@@ -159,7 +168,7 @@ export default function DevDashboardPage() {
   const handleReply = async (id: string) => {
     if (!replyContent.trim()) return;
     try {
-      const response = await fetch(`${API_URL}/dev/messages/${id}/reply`, {
+      const response = await devFetch(`/dev/messages/${id}/reply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +181,7 @@ export default function DevDashboardPage() {
         setReplyContent('');
         setReplyingTo(null);
         // Refresh messages
-        fetch(API_URL + '/dev/messages')
+        devFetch('/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -185,7 +194,7 @@ export default function DevDashboardPage() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      const response = await fetch(`${API_URL}/dev/messages/${id}/status`, {
+      const response = await devFetch(`/dev/messages/${id}/status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +205,7 @@ export default function DevDashboardPage() {
       if (data.success) {
         alert(`Ticket status updated to ${status}`);
         // Refresh messages
-        fetch(API_URL + '/dev/messages')
+        devFetch('/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -215,7 +224,7 @@ export default function DevDashboardPage() {
   const confirmDelete = async () => {
     if (!ticketToDelete) return;
     try {
-      const response = await fetch(`${API_URL}/dev/messages/${ticketToDelete}`, {
+      const response = await devFetch(`/dev/messages/${ticketToDelete}`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -224,7 +233,7 @@ export default function DevDashboardPage() {
         setShowDeleteModal(false);
         setTicketToDelete(null);
         // Refresh messages
-        fetch(API_URL + '/dev/messages')
+        devFetch('/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -236,7 +245,7 @@ export default function DevDashboardPage() {
   };
 
   useEffect(() => {
-    fetch(API_URL + '/dev/users')
+    devFetch('/dev/users')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -246,7 +255,7 @@ export default function DevDashboardPage() {
       })
       .catch(err => console.error(err));
 
-    fetch(API_URL + '/dev/messages')
+    devFetch('/dev/messages')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -260,43 +269,43 @@ export default function DevDashboardPage() {
       });
 
     // Fetch revenue chart data
-    fetch(API_URL + '/dev/revenue-chart')
+    devFetch('/dev/revenue-chart')
       .then(res => res.json())
       .then(data => { if (data.success) setChartData(data.data); })
       .catch(err => console.error(err));
 
     // Fetch plan distribution
-    fetch(API_URL + '/dev/plan-distribution')
+    devFetch('/dev/plan-distribution')
       .then(res => res.json())
       .then(data => { if (data.success) setPlanDist(data.data); else setPlanDist([]); })
       .catch(err => { console.error(err); setPlanDist([]); });
 
     // Fetch at-risk users
-    fetch(API_URL + '/dev/at-risk-users')
+    devFetch('/dev/at-risk-users')
       .then(res => res.json())
       .then(data => { if (data.success) setAtRiskUsers(data.data); else setAtRiskUsers([]); })
       .catch(err => { console.error(err); setAtRiskUsers([]); });
 
     // Fetch activity feed
-    fetch(API_URL + '/dev/activity-feed')
+    devFetch('/dev/activity-feed')
       .then(res => res.json())
       .then(data => { if (data.success) setActivityFeed(data.data); else setActivityFeed([]); })
       .catch(err => { console.error(err); setActivityFeed([]); });
 
     // Fetch ticket analytics
-    fetch(API_URL + '/dev/ticket-analytics')
+    devFetch('/dev/ticket-analytics')
       .then(res => res.json())
       .then(data => { if (data.success) setTicketAnalytics(data.data); else setTicketAnalytics([]); })
       .catch(err => { console.error(err); setTicketAnalytics([]); });
 
     // Fetch top users
-    fetch(API_URL + '/dev/top-users')
+    devFetch('/dev/top-users')
       .then(res => res.json())
       .then(data => { if (data.success) setTopUsers(data.data); else setTopUsers([]); })
       .catch(err => { console.error(err); setTopUsers([]); });
 
     // Fetch platform counters
-    fetch(API_URL + '/dev/platform-counters')
+    devFetch('/dev/platform-counters')
       .then(res => res.json())
       .then(data => { if (data.success) setPlatformCounters(data.data); else setPlatformCounters({}); })
       .catch(err => { console.error(err); setPlatformCounters({}); });
@@ -310,7 +319,7 @@ export default function DevDashboardPage() {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      const response = await fetch(`${API_URL}/dev/users/${userToDelete}`, {
+      const response = await devFetch(`/dev/users/${userToDelete}`, {
         method: 'DELETE'
       });
       const data = await response.json();
@@ -329,7 +338,7 @@ export default function DevDashboardPage() {
 
   const handlePlanChange = async (id: string, newPlan: string) => {
     try {
-      const response = await fetch(`${API_URL}/dev/users/${id}/plan`, {
+      const response = await devFetch(`/dev/users/${id}/plan`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -359,7 +368,7 @@ export default function DevDashboardPage() {
   const handleSuspend = async (id: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
     try {
-      const response = await fetch(`${API_URL}/dev/users/${id}/suspend`, {
+      const response = await devFetch(`/dev/users/${id}/suspend`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_suspended: newStatus })
@@ -391,7 +400,7 @@ export default function DevDashboardPage() {
     }
     setSendingBroadcast(true);
     try {
-      const response = await fetch(API_URL + '/dev/broadcast', {
+      const response = await devFetch('/dev/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: broadcastTitle, content: broadcastContent, type: broadcastType })
@@ -411,8 +420,9 @@ export default function DevDashboardPage() {
     }
   };
 
-  const filteredUsers = users.filter(user => user.role === 'ADMIN' || !user.owner_id)
+  const filteredUsers = users
     .filter(user => 
+
       user.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
