@@ -430,11 +430,11 @@ export const uploadLogo = async (req: Request, res: Response, next: NextFunction
     const user = (req as any).user;
     if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Only admins can upload business logos.' });
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a file' });
-    }
+    const logo_url = req.file ? `/uploads/${req.file.filename}` : (req.body.logo || req.body.business_logo);
 
-    const logo_url = `/uploads/${req.file.filename}`;
+    if (!logo_url) {
+      return res.status(400).json({ error: 'Please upload a file or provide a logo' });
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: user.targetUserId },

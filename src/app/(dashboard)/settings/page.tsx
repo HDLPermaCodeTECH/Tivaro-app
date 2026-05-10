@@ -118,21 +118,55 @@ export default function SettingsPage() {
 
     setUploadingLogo(true);
     setAdminError('');
-    try {
-      const formData = new FormData();
-      formData.append('logo', file);
-      const res = await api.auth.uploadLogo(formData);
-      
-      const updatedUser = { ...user, business_logo: res.business_logo };
-      localStorage.setItem('tivaro_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      setBusinessLogo(res.business_logo);
-      setAdminSuccess('Logo uploaded successfully!');
-    } catch (err: any) {
-      setAdminError(err.message || 'Failed to upload logo.');
-    } finally {
-      setUploadingLogo(false);
-    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+
+        try {
+          const formData = new FormData();
+          formData.append('logo', base64);
+          const res = await api.auth.uploadLogo(formData);
+          
+          const updatedUser = { ...user, business_logo: res.business_logo };
+          localStorage.setItem('tivaro_user', JSON.stringify(updatedUser));
+          setUser(updatedUser);
+          setBusinessLogo(res.business_logo);
+          setAdminSuccess('Logo uploaded successfully!');
+        } catch (err: any) {
+          setAdminError(err.message || 'Failed to upload logo.');
+        } finally {
+          setUploadingLogo(false);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCreateStaff = async (e: React.FormEvent) => {
@@ -516,13 +550,7 @@ export default function SettingsPage() {
                     <div className="relative w-24 h-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden group">
                       {businessLogo ? (
                         <img 
-                          src={
-                            businessLogo.startsWith('http://localhost:4000') 
-                              ? businessLogo.replace('http://localhost:4000', BASE_URL)
-                              : businessLogo.startsWith('http') 
-                                ? businessLogo 
-                                : `${BASE_URL}${businessLogo}`
-                          } 
+                          src={businessLogo.startsWith('http') || businessLogo.startsWith('data:') ? businessLogo : `${BASE_URL}${businessLogo}`} 
                           alt="Business Logo" 
                           className="w-full h-full object-contain" 
                         />
