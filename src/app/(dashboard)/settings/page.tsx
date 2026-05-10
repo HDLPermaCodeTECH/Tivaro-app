@@ -150,7 +150,7 @@ export default function SettingsPage() {
 
         try {
           const formData = new FormData();
-          formData.append('logo', base64);
+          formData.append('business_logo', base64);
           const res = await api.auth.uploadLogo(formData);
           
           const updatedUser = { ...user, business_logo: res.business_logo };
