@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Save, Trash2, Truck, ImageIcon } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, BASE_URL } from '@/lib/api';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -25,7 +25,6 @@ export default function ProductModal({ isOpen, onClose, onSave, product }: Produ
   });
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -70,6 +69,45 @@ export default function ProductModal({ isOpen, onClose, onSave, product }: Produ
     }
   }, [product, isOpen]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        setFormData({ ...formData, image_url: base64 });
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -87,9 +125,7 @@ export default function ProductModal({ isOpen, onClose, onSave, product }: Produ
         formDataToSend.append('supplier_id', formData.supplier_id);
       }
       
-      if (imageFile) {
-        formDataToSend.append('image', imageFile);
-      } else if (formData.image_url) {
+      if (formData.image_url) {
         formDataToSend.append('image_url', formData.image_url);
       }
 
@@ -154,16 +190,16 @@ export default function ProductModal({ isOpen, onClose, onSave, product }: Produ
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Product Image</label>
             <div className="relative border-2 border-dashed border-border/60 rounded-2xl p-4 hover:border-primary/50 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 bg-muted/10 h-40 overflow-hidden">
-              {imageFile || formData.image_url ? (
+              {formData.image_url ? (
                 <div className="relative w-full h-full flex items-center justify-center">
                   <img 
-                    src={imageFile ? URL.createObjectURL(imageFile) : (formData.image_url.startsWith('http') ? formData.image_url : `http://127.0.0.1:4000${formData.image_url}`)} 
+                    src={formData.image_url.startsWith('http') || formData.image_url.startsWith('data:') ? formData.image_url : `${BASE_URL}${formData.image_url}`} 
                     alt="Preview" 
                     className="w-full h-full object-contain rounded-xl"
                   />
                   <button 
                     type="button"
-                    onClick={() => { setImageFile(null); setFormData({ ...formData, image_url: '' }); }}
+                    onClick={() => { setFormData({ ...formData, image_url: '' }); }}
                     className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full hover:bg-destructive/90 shadow-lg"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -175,12 +211,12 @@ export default function ProductModal({ isOpen, onClose, onSave, product }: Produ
                     <ImageIcon className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-bold text-foreground">Click to upload photo</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Recommended: Square, Max 2MB</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Recommended: Square, Auto-resized</span>
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    onChange={handleImageChange}
                   />
                 </label>
               )}
