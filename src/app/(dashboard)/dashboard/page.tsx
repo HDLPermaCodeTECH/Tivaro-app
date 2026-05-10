@@ -127,39 +127,39 @@ export default function DashboardPage() {
             <span className="text-xs font-bold tracking-tight uppercase tracking-widest">{format(currentTime, 'EEEE, MMM dd • hh:mm:ss a')}</span>
           </div>
         </div>
-        <div className="flex gap-4">
-          <Link href="/sales" className="btn-primary group !px-8 !py-6 shadow-2xl shadow-primary/30">
-            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+        <div className="flex gap-4 w-full sm:w-auto">
+          <Link href="/sales" className="btn-primary group !px-4 sm:!px-8 !py-3 sm:!py-6 shadow-2xl shadow-primary/30 text-sm sm:text-base w-full sm:w-auto justify-center">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-90" />
             New Transaction
           </Link>
         </div>
       </div>
 
       {/* Main KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
         {[
           { label: 'Today Revenue', value: `₱${stats.totalSalesToday.toLocaleString()}`, icon: TrendingUp, color: 'emerald', detail: 'Actual cash collected' },
           { label: 'Utang Collection', value: `₱${stats.totalDebts.toLocaleString()}`, icon: CreditCard, color: 'rose', detail: 'Total accounts receivable' },
           { label: 'Stock Alerts', value: stats.lowStockItems, icon: AlertTriangle, color: 'amber', detail: 'Needs immediate attention', adminOnly: true },
           { label: 'Inventory Size', value: stats.totalProducts, icon: Package, color: 'blue', detail: 'Total unique products', adminOnly: true },
         ].filter(stat => !stat.adminOnly || user?.role === 'ADMIN').map((stat, i) => (
-          <div key={i} className="card group hover:-translate-y-2 transition-all duration-500 !p-4 sm:!p-6 border-2 border-transparent hover:border-primary/5">
-            <div className="flex justify-between items-start mb-6">
+          <div key={i} className="card group hover:-translate-y-2 transition-all duration-500 !p-3 sm:!p-6 border-2 border-transparent hover:border-primary/5">
+            <div className="flex justify-between items-start mb-3 sm:mb-6">
               <div className={cn(
-                "p-4 rounded-2xl shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+                "p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
                 stat.color === 'emerald' ? "bg-emerald-500/10 text-emerald-600 shadow-emerald-500/10" :
                 stat.color === 'blue' ? "bg-blue-500/10 text-blue-500 shadow-blue-500/10" :
                 stat.color === 'amber' ? "bg-amber-500/10 text-amber-500 shadow-amber-500/10" :
                 "bg-rose-500/10 text-rose-500 shadow-rose-500/10"
               )}>
-                <stat.icon className="w-6 h-6" />
+                <stat.icon className="w-4 h-4 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">System KPI</div>
+              <div className="text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">System KPI</div>
             </div>
             <div>
-              <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
-              <h3 className="text-4xl font-display font-bold text-foreground tracking-tight">{stat.value}</h3>
-              <p className="text-[10px] text-muted-foreground/60 mt-4 font-bold uppercase tracking-widest">{stat.detail}</p>
+              <p className="text-[8px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-1 sm:mb-2">{stat.label}</p>
+              <h3 className="text-lg sm:text-4xl font-display font-bold text-foreground tracking-tight">{stat.value}</h3>
+              <p className="text-[8px] sm:text-[10px] text-muted-foreground/60 mt-1 sm:mt-4 font-bold uppercase tracking-widest hidden sm:block">{stat.detail}</p>
             </div>
           </div>
         ))}
