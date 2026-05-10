@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -37,8 +37,10 @@ model User {
   receipt_footer   String?
   daily_goal       Float         @default(0)
   last_login_at    DateTime?
+  is_suspended     Boolean       @default(false)
   suppliers        Supplier[]
   debt_payments    DebtPayment[] @relation("CashierPayments")
+  messages         Message[]
   created_at       DateTime      @default(now())
 }
 
@@ -177,4 +179,24 @@ model DebtPayment {
   cashier        User?    @relation("CashierPayments", fields: [cashier_id], references: [id])
   date           DateTime @default(now())
   created_at     DateTime @default(now())
+}
+
+model Message {
+  id         String    @id @default(uuid())
+  user_id    String
+  user       User      @relation(fields: [user_id], references: [id])
+  content    String
+  status     String    @default("PENDING") // PENDING, READ, RESOLVED
+  reply      String?
+  replied_at DateTime?
+  attachment String?
+  created_at DateTime  @default(now())
+}
+
+model Announcement {
+  id         String   @id @default(uuid())
+  title      String
+  content    String
+  type       String   @default("INFO") // INFO, WARNING, MAINTENANCE
+  created_at DateTime @default(now())
 }
