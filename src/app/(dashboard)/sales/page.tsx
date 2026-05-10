@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api, BASE_URL } from '@/lib/api';
 import { Search, Plus, Package, ShoppingBag, X } from 'lucide-react';
+import { db } from '@/lib/db';
 import { useCartStore } from '@/store/useCartStore';
 import Cart from '@/components/sales/Cart';
 import { cn } from '@/lib/utils';
@@ -25,9 +26,40 @@ export default function SalesPage() {
     setLoading(true);
     try {
       const data = await api.products.list();
-      setProducts(data?.filter((p: any) => p.quantity > 0) || []);
+      const availableProducts = data?.filter((p: any) => p.quantity > 0) || [];
+      setProducts(availableProducts);
+      
+      // Cache products to IndexedDB
+      try {
+        await db.products.clear();
+        await db.products.bulkAdd(availableProducts.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku || '',
+          price: Number(p.selling_price),
+          quantity: p.quantity
+        })));
+      } catch (dbError) {
+        console.error('Failed to cache products:', dbError);
+      }
     } catch (error) {
       console.error(error);
+      // Fallback to cached products
+      try {
+        const cachedProducts = await db.products.toArray();
+        if (cachedProducts.length > 0) {
+          setProducts(cachedProducts.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            sku: p.sku,
+            selling_price: p.price,
+            quantity: p.quantity
+          })));
+          toast.info('Working offline (Loaded products from cache)');
+        }
+      } catch (dbError) {
+        console.error('Failed to load cached products:', dbError);
+      }
     } finally {
       setLoading(false);
     }
