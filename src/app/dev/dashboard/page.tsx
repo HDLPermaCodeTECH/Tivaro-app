@@ -6,6 +6,8 @@ import { Users, DollarSign, Activity, MessageSquare, LogOut, Search, ChevronDown
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Legend, PieChart, Pie, Cell } from 'recharts';
 import { UserX, Bell, Megaphone, TrendingUp } from 'lucide-react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.tivaroapp.com/api';
+
 export default function DevDashboardPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalUsers: 0, totalRevenue: 0, activeSessions: 0 });
@@ -53,7 +55,7 @@ export default function DevDashboardPage() {
 
   const handleImpersonate = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:4000/api/dev/impersonate/${id}`);
+      const res = await fetch(`${API_URL}/dev/impersonate/${id}`);
       const data = await res.json();
       if (data.success) {
         localStorage.setItem('tivaro_token', data.token);
@@ -74,7 +76,7 @@ export default function DevDashboardPage() {
     if (!msgContent.trim() || !userToMsg) return;
     setSendingMsg(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/send-message`, {
+      const response = await fetch(`${API_URL}/dev/send-message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ export default function DevDashboardPage() {
     }
     setSendingEmail(true);
     try {
-      const response = await fetch('http://localhost:4000/api/dev/send-email', {
+      const response = await fetch(API_URL + '/dev/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: emailTo, subject: emailSubject, content: emailContent })
@@ -157,7 +159,7 @@ export default function DevDashboardPage() {
   const handleReply = async (id: string) => {
     if (!replyContent.trim()) return;
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/messages/${id}/reply`, {
+      const response = await fetch(`${API_URL}/dev/messages/${id}/reply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +172,7 @@ export default function DevDashboardPage() {
         setReplyContent('');
         setReplyingTo(null);
         // Refresh messages
-        fetch('http://localhost:4000/api/dev/messages')
+        fetch(API_URL + '/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -183,7 +185,7 @@ export default function DevDashboardPage() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/messages/${id}/status`, {
+      const response = await fetch(`${API_URL}/dev/messages/${id}/status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +196,7 @@ export default function DevDashboardPage() {
       if (data.success) {
         alert(`Ticket status updated to ${status}`);
         // Refresh messages
-        fetch('http://localhost:4000/api/dev/messages')
+        fetch(API_URL + '/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -213,7 +215,7 @@ export default function DevDashboardPage() {
   const confirmDelete = async () => {
     if (!ticketToDelete) return;
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/messages/${ticketToDelete}`, {
+      const response = await fetch(`${API_URL}/dev/messages/${ticketToDelete}`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -222,7 +224,7 @@ export default function DevDashboardPage() {
         setShowDeleteModal(false);
         setTicketToDelete(null);
         // Refresh messages
-        fetch('http://localhost:4000/api/dev/messages')
+        fetch(API_URL + '/dev/messages')
           .then(res => res.json())
           .then(data => {
             if (data.success) setMessages(sortMessages(data.messages));
@@ -234,7 +236,7 @@ export default function DevDashboardPage() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/dev/users')
+    fetch(API_URL + '/dev/users')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -244,7 +246,7 @@ export default function DevDashboardPage() {
       })
       .catch(err => console.error(err));
 
-    fetch('http://localhost:4000/api/dev/messages')
+    fetch(API_URL + '/dev/messages')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -258,43 +260,43 @@ export default function DevDashboardPage() {
       });
 
     // Fetch revenue chart data
-    fetch('http://localhost:4000/api/dev/revenue-chart')
+    fetch(API_URL + '/dev/revenue-chart')
       .then(res => res.json())
       .then(data => { if (data.success) setChartData(data.data); })
       .catch(err => console.error(err));
 
     // Fetch plan distribution
-    fetch('http://localhost:4000/api/dev/plan-distribution')
+    fetch(API_URL + '/dev/plan-distribution')
       .then(res => res.json())
       .then(data => { if (data.success) setPlanDist(data.data); else setPlanDist([]); })
       .catch(err => { console.error(err); setPlanDist([]); });
 
     // Fetch at-risk users
-    fetch('http://localhost:4000/api/dev/at-risk-users')
+    fetch(API_URL + '/dev/at-risk-users')
       .then(res => res.json())
       .then(data => { if (data.success) setAtRiskUsers(data.data); else setAtRiskUsers([]); })
       .catch(err => { console.error(err); setAtRiskUsers([]); });
 
     // Fetch activity feed
-    fetch('http://localhost:4000/api/dev/activity-feed')
+    fetch(API_URL + '/dev/activity-feed')
       .then(res => res.json())
       .then(data => { if (data.success) setActivityFeed(data.data); else setActivityFeed([]); })
       .catch(err => { console.error(err); setActivityFeed([]); });
 
     // Fetch ticket analytics
-    fetch('http://localhost:4000/api/dev/ticket-analytics')
+    fetch(API_URL + '/dev/ticket-analytics')
       .then(res => res.json())
       .then(data => { if (data.success) setTicketAnalytics(data.data); else setTicketAnalytics([]); })
       .catch(err => { console.error(err); setTicketAnalytics([]); });
 
     // Fetch top users
-    fetch('http://localhost:4000/api/dev/top-users')
+    fetch(API_URL + '/dev/top-users')
       .then(res => res.json())
       .then(data => { if (data.success) setTopUsers(data.data); else setTopUsers([]); })
       .catch(err => { console.error(err); setTopUsers([]); });
 
     // Fetch platform counters
-    fetch('http://localhost:4000/api/dev/platform-counters')
+    fetch(API_URL + '/dev/platform-counters')
       .then(res => res.json())
       .then(data => { if (data.success) setPlatformCounters(data.data); else setPlatformCounters({}); })
       .catch(err => { console.error(err); setPlatformCounters({}); });
@@ -308,7 +310,7 @@ export default function DevDashboardPage() {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/users/${userToDelete}`, {
+      const response = await fetch(`${API_URL}/dev/users/${userToDelete}`, {
         method: 'DELETE'
       });
       const data = await response.json();
@@ -327,7 +329,7 @@ export default function DevDashboardPage() {
 
   const handlePlanChange = async (id: string, newPlan: string) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/users/${id}/plan`, {
+      const response = await fetch(`${API_URL}/dev/users/${id}/plan`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -357,7 +359,7 @@ export default function DevDashboardPage() {
   const handleSuspend = async (id: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
     try {
-      const response = await fetch(`http://localhost:4000/api/dev/users/${id}/suspend`, {
+      const response = await fetch(`${API_URL}/dev/users/${id}/suspend`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_suspended: newStatus })
@@ -389,7 +391,7 @@ export default function DevDashboardPage() {
     }
     setSendingBroadcast(true);
     try {
-      const response = await fetch('http://localhost:4000/api/dev/broadcast', {
+      const response = await fetch(API_URL + '/dev/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: broadcastTitle, content: broadcastContent, type: broadcastType })
