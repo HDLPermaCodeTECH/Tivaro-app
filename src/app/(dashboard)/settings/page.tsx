@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { api } from '@/lib/api';
+import { api, BASE_URL } from '@/lib/api';
 import { 
   Settings as SettingsIcon, 
   UserPlus, 
@@ -515,7 +515,17 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-6">
                     <div className="relative w-24 h-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden group">
                       {businessLogo ? (
-                        <img src={businessLogo} alt="Business Logo" className="w-full h-full object-contain" />
+                        <img 
+                          src={
+                            businessLogo.startsWith('http://localhost:4000') 
+                              ? businessLogo.replace('http://localhost:4000', BASE_URL)
+                              : businessLogo.startsWith('http') 
+                                ? businessLogo 
+                                : `${BASE_URL}${businessLogo}`
+                          } 
+                          alt="Business Logo" 
+                          className="w-full h-full object-contain" 
+                        />
                       ) : (
                         <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
                       )}

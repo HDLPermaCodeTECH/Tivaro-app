@@ -434,7 +434,7 @@ export const uploadLogo = async (req: Request, res: Response, next: NextFunction
       return res.status(400).json({ error: 'Please upload a file' });
     }
 
-    const logo_url = `http://localhost:4000/uploads/${req.file.filename}`;
+    const logo_url = `/uploads/${req.file.filename}`;
 
     const updatedUser = await prisma.user.update({
       where: { id: user.targetUserId },
