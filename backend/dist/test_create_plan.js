@@ -36,28 +36,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const productController = __importStar(require("./product.controller"));
-const auth_middleware_1 = require("../../middleware/auth.middleware");
-const multer_1 = __importDefault(require("multer"));
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-// Siguraduhing existing ang upload directory
-fs_1.default.mkdirSync('public/uploads', { recursive: true });
-const storage = multer_1.default.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path_1.default.extname(file.originalname));
+const axios_1 = __importDefault(require("axios"));
+const dotenv = __importStar(require("dotenv"));
+const path = __importStar(require("path"));
+// Load .env file
+dotenv.config({ path: path.join(__dirname, '../.env') });
+const secretKey = process.env.PAYMONGO_SECRET_KEY;
+if (!secretKey) {
+    console.error('PAYMONGO_SECRET_KEY is not set');
+    process.exit(1);
+}
+const authHeader = 'Basic ' + Buffer.from(secretKey + ':').toString('base64');
+async function createPlan() {
+    try {
+        const response = await axios_1.default.post('https://api.paymongo.com/v1/subscriptions/plans', {
+            data: {
+                attributes: {
+                    name: 'Tivaro PRO Plan',
+                    description: 'Monthly subscription for Tivaro PRO features',
+                    amount: 49900, // ₱499.00 in cents
+                    currency: 'PHP',
+                    interval: 'monthly',
+                    interval_count: 1
+                }
+            }
+        }, {
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json',
+                'authorization': authHeader
+            }
+        });
+        console.log('Plan Created Successfully!');
+        console.log('Plan ID:', response.data.data.id);
+        console.log('Full Response:', JSON.stringify(response.data, null, 2));
     }
-});
-const upload = (0, multer_1.default)({ storage: storage });
-const router = (0, express_1.Router)();
-router.use(auth_middleware_1.authenticate);
-router.get('/', productController.getProducts);
-router.post('/', upload.single('image'), productController.createProduct);
-router.put('/:id', upload.single('image'), productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
-exports.default = router;
+    catch (error) {
+        console.error('Error creating plan:', error.response?.data || error.message);
+    }
+}
+createPlan();

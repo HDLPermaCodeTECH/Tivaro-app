@@ -46,5 +46,6 @@ router.post('/staff', auth_middleware_1.authenticate, authController.createStaff
 router.get('/staff', auth_middleware_1.authenticate, authController.getStaff);
 router.put('/staff/:id', auth_middleware_1.authenticate, authController.updateStaff);
 router.delete('/staff/:id', auth_middleware_1.authenticate, authController.deleteStaff);
+router.get('/me', auth_middleware_1.authenticate, authController.getMe);
 router.get('/shift-summary', auth_middleware_1.authenticate, authController.getShiftSummary);
 exports.default = router;

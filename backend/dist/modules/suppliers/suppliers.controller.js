@@ -48,7 +48,7 @@ exports.createSupplier = createSupplier;
 const updateSupplier = async (req, res, next) => {
     try {
         const user_id = req.user?.userId;
-        const { id } = req.params;
+        const id = req.params.id;
         const data = supplierSchema.parse(req.body);
         const supplier = await prisma_1.default.supplier.update({
             where: { id, user_id },
@@ -64,7 +64,7 @@ exports.updateSupplier = updateSupplier;
 const deleteSupplier = async (req, res, next) => {
     try {
         const user_id = req.user?.userId;
-        const { id } = req.params;
+        const id = req.params.id;
         await prisma_1.default.supplier.delete({
             where: { id, user_id }
         });

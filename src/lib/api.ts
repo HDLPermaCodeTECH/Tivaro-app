@@ -108,7 +108,16 @@ class ApiService {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${this.token}` },
       body: formData
-    }).then(res => res.ok ? res.json() : res.json().then(e => { throw e })),
+    }).then(async res => {
+      if (res.ok) return res.json();
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        throw json;
+      } catch (e) {
+        throw new Error(text || `Server returned ${res.status}`);
+      }
+    }),
     getSession: () => {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('tivaro_token');

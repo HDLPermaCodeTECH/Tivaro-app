@@ -433,20 +433,27 @@ export const uploadLogo = async (req: Request, res: Response, next: NextFunction
     const user = (req as any).user;
     if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Only admins can upload business logos.' });
 
+    console.log('uploadLogo called. Body keys:', Object.keys(req.body));
+    console.log('uploadLogo req.file:', req.file);
+
     const logo_url = req.file ? `/uploads/${req.file.filename}` : (req.body.logo || req.body.business_logo);
 
     if (!logo_url) {
+      console.log('uploadLogo failed: No logo provided');
       return res.status(400).json({ error: 'Please upload a file or provide a logo' });
     }
 
+    console.log('Saving logo to database...');
     const updatedUser = await prisma.user.update({
       where: { id: user.targetUserId },
       data: { business_logo: logo_url },
       select: { id: true, business_logo: true }
     });
 
+    console.log('Logo saved successfully.');
     res.json(updatedUser);
   } catch (error) {
+    console.error('Error in uploadLogo:', error);
     next(error);
   }
 };

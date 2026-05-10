@@ -33,7 +33,7 @@ const getReceipt = async (req, res, next) => {
                     select: { name: true }
                 },
                 cashier: {
-                    select: { name: true, email: true }
+                    select: { name: true, email: true, role: true }
                 },
                 items: {
                     include: {
