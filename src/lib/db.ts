@@ -31,7 +31,7 @@ const db = new Dexie('TivaroPOS') as Dexie & {
 };
 
 // Schema declaration:
-db.version(1).stores({
+db.version(2).stores({
   products: 'id, name, sku',
   sales: 'id, synced, created_at',
   customers: 'id, name, phone'
