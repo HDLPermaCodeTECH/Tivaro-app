@@ -45,3 +45,12 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
+
+export const authenticateDev = (req: AuthRequest, res: Response, next: NextFunction) => {
+  authenticate(req, res, () => {
+    if (req.user?.email !== 'support@tivaroapp.com') {
+      return res.status(403).json({ error: 'Forbidden: Admin access only' });
+    }
+    next();
+  });
+};

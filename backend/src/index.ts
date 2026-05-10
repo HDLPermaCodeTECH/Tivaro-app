@@ -16,6 +16,7 @@ import debtRoutes from './modules/debts/debts.routes';
 import paymentRoutes from './modules/payments/payments.routes';
 import { errorHandler } from './middleware/error.middleware';
 import prisma from './config/prisma';
+import { authenticateDev } from './middleware/auth.middleware';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/debts', debtRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Dev Routes
+app.use('/api/dev', authenticateDev);
 app.get('/api/dev/users', async (req, res) => {
   try {
     const users = await (prisma.user as any).findMany({
