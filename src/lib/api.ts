@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000/api';
+export const BASE_URL = API_URL.replace('/api', '');
 
 class ApiService {
   private token: string | null = typeof window !== 'undefined' ? localStorage.getItem('tivaro_token') : null;

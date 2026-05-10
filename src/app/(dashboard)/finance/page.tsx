@@ -68,19 +68,21 @@ export default function FinancePage() {
           <h1 className="text-3xl font-bold tracking-tight">Finance / Kita</h1>
           <p className="text-muted-foreground">Monitor your business health and track profitability.</p>
         </div>
-        <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-border shadow-sm">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <input 
-                    type="date" 
-                    className="text-xs font-bold border-none focus:ring-0 p-0"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center justify-between gap-2 bg-white px-3 py-1.5 rounded-lg border border-border shadow-sm">
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <input 
+                        type="date" 
+                        className="text-xs font-bold border-none focus:ring-0 p-0 bg-transparent"
+                        value={dateRange.start}
+                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    />
+                </div>
                 <span className="text-muted-foreground text-xs">to</span>
                 <input 
                     type="date" 
-                    className="text-xs font-bold border-none focus:ring-0 p-0"
+                    className="text-xs font-bold border-none focus:ring-0 p-0 bg-transparent"
                     value={dateRange.end}
                     onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                 />
@@ -90,7 +92,7 @@ export default function FinancePage() {
               setSelectedExpense(null);
               setModalOpen(true);
             }}
-            className="btn-primary"
+            className="btn-primary justify-center"
           >
             <Plus className="w-4 h-4" />
             Add Expense

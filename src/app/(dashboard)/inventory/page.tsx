@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { api } from '@/lib/api';
+import { api, BASE_URL } from '@/lib/api';
 import { 
   Plus, 
   Search, 
@@ -184,7 +184,7 @@ function InventoryContent() {
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-muted rounded-xl overflow-hidden flex-shrink-0 border border-border/50 flex items-center justify-center">
                   {product.image_url ? (
-                    <img src={product.image_url.startsWith('http') ? product.image_url : `https://api.tivaroapp.com${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={product.image_url.startsWith('http') ? product.image_url : `${BASE_URL}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
                     <Package className="w-5 h-5 text-muted-foreground/50" />
                   )}
@@ -283,7 +283,7 @@ function InventoryContent() {
                       <div className="flex items-center gap-4">
                         <div className="w-20 h-20 bg-muted rounded-xl overflow-hidden flex-shrink-0 border border-border/50 flex items-center justify-center">
                           {product.image_url ? (
-                            <img src={product.image_url.startsWith('http') ? product.image_url : `https://api.tivaroapp.com${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={product.image_url.startsWith('http') ? product.image_url : `${BASE_URL}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <Package className="w-5 h-5 text-muted-foreground/50" />
                           )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { api, BASE_URL } from '@/lib/api';
 import { Search, Plus, Package, ShoppingBag, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import Cart from '@/components/sales/Cart';
@@ -103,7 +103,7 @@ export default function SalesPage() {
               >
                 <div className="w-full h-48 sm:h-64 bg-muted/50 flex items-center justify-center border-b border-border/50">
                   {product.image_url ? (
-                    <img src={product.image_url.startsWith('http') ? product.image_url : `https://api.tivaroapp.com${product.image_url}`} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={product.image_url.startsWith('http') ? product.image_url : `${BASE_URL}${product.image_url}`} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   ) : (
                     <Package className="w-8 h-8 text-muted-foreground/30" />
                   )}
