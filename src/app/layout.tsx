@@ -15,12 +15,15 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Tivaro | Professional Business Platform",
   description: "Next-generation business management and finance tracking.",
+  manifest: "/manifest.json",
   icons: {
     icon: "/tivaro_logo_1024.svg",
   },
 };
 
 import { Toaster } from 'sonner';
+import PWARegister from '@/components/PWARegister';
+import SyncProvider from '@/components/SyncProvider';
 
 export default function RootLayout({
   children,
@@ -33,7 +36,10 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col font-sans overflow-x-hidden">
-        {children}
+        <PWARegister />
+        <SyncProvider>
+          {children}
+        </SyncProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

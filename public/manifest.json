@@ -1,0 +1,16 @@
+{
+  "name": "Tivaro POS",
+  "short_name": "Tivaro",
+  "description": "Professional Business Platform and POS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/tivaro_logo_1024.svg",
+      "sizes": "1024x1024",
+      "type": "image/svg+xml"
+    }
+  ]
+}

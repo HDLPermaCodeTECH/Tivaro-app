@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
+import { db } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -91,7 +92,34 @@ export default function Cart({ onClose }: CartProps) {
         due_date: dueDate || undefined,
       };
 
-      const result = await api.sales.create(saleData);
+      let result;
+      try {
+        result = await api.sales.create(saleData);
+      } catch (apiError: any) {
+        // Fallback to offline storage if network fails
+        const isNetworkError = !navigator.onLine || 
+                               apiError.message?.includes('Network Error') || 
+                               apiError.message?.includes('fetch') ||
+                               apiError.message?.includes('503');
+                               
+        if (isNetworkError) {
+          const localId = `local_${Date.now()}`;
+          await db.sales.add({
+            id: localId,
+            user_id: '', // Will be filled by server on sync
+            total_amount: saleData.total_amount,
+            items: saleData.items,
+            synced: false,
+            created_at: new Date()
+          });
+          toast.success('Offline Mode: Sale saved locally! Will sync when online.');
+          clearCart();
+          setIsProcessing(false);
+          return;
+        } else {
+          throw apiError;
+        }
+      }
 
       toast.success(paymentMode === 'PAID' ? 'Sale completed!' : 'Debt recorded successfully!');
       clearCart();
