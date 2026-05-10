@@ -205,13 +205,13 @@ export default function DebtsPage() {
 
       {/* Filter and Table Container */}
       <div className="card !p-8 space-y-8">
-        <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-2xl w-fit">
+        <div className="flex flex-wrap items-center gap-2 bg-muted/30 p-1.5 rounded-2xl w-full sm:w-fit">
           {['ALL', 'PENDING', 'OVERDUE', 'PAID'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                "flex-1 sm:flex-initial px-4 sm:px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                 filter === f ? "bg-white text-primary shadow-md" : "text-muted-foreground hover:bg-white/50"
               )}
             >
