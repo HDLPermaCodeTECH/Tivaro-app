@@ -36,7 +36,9 @@ export default function DevDashboardPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'tickets' | 'emailer'>('overview');
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [subStats, setSubStats] = useState({ totalRevenue: 0, monthlyRevenue: 0, planDistribution: [] });
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'tickets' | 'emailer' | 'subscriptions'>('overview');
   const [expandedTickets, setExpandedTickets] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
@@ -309,6 +311,18 @@ export default function DevDashboardPage() {
       .then(res => res.json())
       .then(data => { if (data.success) setPlatformCounters(data.data); else setPlatformCounters({}); })
       .catch(err => { console.error(err); setPlatformCounters({}); });
+
+    // Fetch subscriptions
+    devFetch('/dev/subscriptions')
+      .then(res => res.json())
+      .then(data => { if (data.success) setSubscriptions(data.data); else setSubscriptions([]); })
+      .catch(err => { console.error(err); setSubscriptions([]); });
+
+    // Fetch subscription stats
+    devFetch('/dev/subscriptions/stats')
+      .then(res => res.json())
+      .then(data => { if (data.success) setSubStats(data.stats); })
+      .catch(err => console.error(err));
   }, []);
 
   const handleDelete = (id: string) => {
@@ -480,6 +494,12 @@ export default function DevDashboardPage() {
             className={`text-sm font-semibold pb-2 px-1 transition-colors ${activeTab === 'emailer' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-400 hover:text-white'}`}
           >
             Emailer
+          </button>
+          <button 
+            onClick={() => setActiveTab('subscriptions')}
+            className={`text-sm font-semibold pb-2 px-1 transition-colors ${activeTab === 'subscriptions' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-400 hover:text-white'}`}
+          >
+            Subscriptions
           </button>
         </div>
 
@@ -1063,6 +1083,62 @@ export default function DevDashboardPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'subscriptions' && (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-400">Monthly Subscription Revenue</span>
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                </div>
+                <p className="text-3xl font-bold">₱{subStats.monthlyRevenue.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">Current month</p>
+              </div>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-400">Total Subscription Revenue</span>
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                </div>
+                <p className="text-3xl font-bold">₱{subStats.totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">All time</p>
+              </div>
+            </div>
+
+            {/* Subscriptions Table */}
+            <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold">Subscribed Users</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Users who availed paid plans</p>
+                </div>
+                <Users className="w-5 h-5 text-indigo-400" />
+              </div>
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                {subscriptions.length > 0 ? (
+                  subscriptions.map((sub: any) => (
+                    <div key={sub.id} className="flex items-center justify-between bg-slate-700/50 p-4 rounded-xl">
+                      <div>
+                        <p className="text-sm font-medium">{sub.user?.name || 'Unknown'}</p>
+                        <p className="text-xs text-slate-400">{sub.user?.email}</p>
+                        <p className="text-xs text-slate-500 mt-1">Availed: {new Date(sub.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${sub.plan === 'PRO' ? 'bg-emerald-900 text-emerald-300' : 'bg-indigo-900 text-indigo-300'}`}>
+                          {sub.plan}
+                        </span>
+                        <p className="text-sm font-bold text-emerald-400 mt-1">₱{sub.amount.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-400 text-center py-4">No subscriptions yet.</p>
+                )}
+              </div>
             </div>
           </div>
         )}
