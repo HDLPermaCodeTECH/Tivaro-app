@@ -3,6 +3,7 @@
 import { format } from 'date-fns';
 import { MapPin, Phone, Calendar, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BASE_URL } from '@/lib/api';
 
 interface ReceiptTemplateProps {
   sale: any;
@@ -43,7 +44,7 @@ export const ReceiptTemplate = ({ sale, paperSize = '80mm' }: ReceiptTemplatePro
         {business.business_logo && (
           <div className="flex justify-center mb-4">
             <img 
-              src={business.business_logo} 
+              src={business.business_logo.startsWith('http') ? business.business_logo : `${BASE_URL}${business.business_logo}`} 
               alt="Logo" 
               className="max-w-[150px] max-h-[60px] object-contain grayscale contrast-125" 
             />
