@@ -50,9 +50,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [isSupportOpen, setSupportOpen] = useState(false);
-  const [supportContent, setSupportContent] = useState('');
-  const [sendingSupport, setSendingSupport] = useState(false);
+
   const [announcement, setAnnouncement] = useState<any>(null);
   const [announcementDismissed, setAnnouncementDismissed] = useState<string | null>(
     typeof window !== 'undefined' ? localStorage.getItem('tivaro_announcement_dismissed') : null
@@ -60,35 +58,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleSendSupport = async () => {
-    if (!supportContent.trim() || !user) return;
-    setSendingSupport(true);
-    try {
-      const response = await fetch('http://localhost:4000/api/dev/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          content: supportContent.trim(),
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        toast.success('Message sent successfully!');
-        setSupportContent('');
-        setSupportOpen(false);
-      } else {
-        toast.error('Failed to send message.');
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred.');
-    } finally {
-      setSendingSupport(false);
-    }
-  };
+
 
   useEffect(() => {
     const session = api.auth.getSession();
@@ -345,42 +315,7 @@ export default function DashboardLayout({
         onConfirm={confirmLogout}
       />
 
-      {/* Floating Support Widget */}
-      <div className="fixed bottom-6 right-6 z-[100] print:hidden">
-        <button 
-          onClick={() => setSupportOpen(!isSupportOpen)}
-          className="w-16 h-16 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-105 transition-all active:scale-95 border-2 border-white/30"
-        >
-          <Headset className="w-8 h-8" />
-        </button>
 
-        {isSupportOpen && (
-          <div className="absolute bottom-16 right-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4 animate-in slide-in-from-bottom-5">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🎧</span>
-                <h3 className="font-bold text-slate-800">Support & Feedback</h3>
-              </div>
-              <button onClick={() => setSupportOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <textarea
-              placeholder="Type your message here..."
-              value={supportContent}
-              onChange={(e) => setSupportContent(e.target.value)}
-              className="w-full p-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-300 min-h-[100px] text-slate-800"
-            />
-            <button 
-              onClick={handleSendSupport}
-              disabled={sendingSupport || !supportContent.trim()}
-              className="btn-primary w-full !py-2 text-sm flex items-center justify-center gap-2"
-            >
-              {sendingSupport ? 'Sending...' : 'Send Message'}
-            </button>
-          </div>
-        )}
-      </div>
     </div>
 
   );
